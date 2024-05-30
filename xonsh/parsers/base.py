@@ -111,6 +111,13 @@ def ensure_list_from_str_or_list(x, lineno=None, col=None):
         col_offset=col,
     )
 
+def xonsh_python_mode(lineno, col):
+    """Creates the AST node for calling the __xonsh__.python_mode() function."""
+    return xonsh_call("__xonsh__.python_mode", [], lineno=lineno, col=col)
+
+def xonsh_subprocess_mode(lineno, col):
+    """Creates the AST node for calling the __xonsh__.subprocess_mode() function."""
+    return xonsh_call("__xonsh__.subprocess_mode", [], lineno=lineno, col=col)
 
 def xonsh_help(x, lineno=None, col=None):
     """Creates the AST node for calling the __xonsh__.help() function."""
@@ -268,6 +275,8 @@ class BaseParser:
         opt_rules = [
             "newlines",
             "arglist",
+            "subproc",
+            "expr_stmt",
             "func_call",
             "rarrow_test",
             "typedargslist",
@@ -280,7 +289,6 @@ class BaseParser:
             "comma_vfpdef_list",
             "comma_pow_vfpdef",
             "equals_yield_expr_or_testlist_list",
-            "testlist",
             "as_name",
             "period_or_ellipsis_list",
             "comma_import_as_name_list",
@@ -430,6 +438,8 @@ class BaseParser:
             "ne",
             "pass",
             "period",
+            "period_dollar",
+            "period_question",
             "pipeequal",
             "plusequal",
             "pow",
@@ -695,6 +705,7 @@ class BaseParser:
                       | eval_input
                       | empty
         """
+        print("start", ast.dump(p[1]))
         p[0] = p[1]
 
     def p_single_input(self, p):
@@ -1194,7 +1205,9 @@ class BaseParser:
                    | global_stmt
                    | nonlocal_stmt
                    | assert_stmt
+                   | parse_mode_stmt
         """
+        print("small stmt", p[1])
         p[0] = p[1]
 
     _augassign_op = {
@@ -1212,6 +1225,34 @@ class BaseParser:
         "<<=": ast.LShift,
         ">>=": ast.RShift,
     }
+
+    def p_parse_mode_stmt(self, p):
+        """
+        parse_mode_stmt : PERIOD PERIOD any_raw_toks_opt
+                       | PERIOD_DOLLAR any_raw_toks_opt
+                       | PERIOD_QUESTION
+        """
+        print("lol")
+        print(p[1])
+        print(p[2])
+        print(p[3])
+        if p[1] == '.':
+            if p[3] is None:
+                p[0] = xonsh_python_mode()
+            else:
+                p[0] = p[3]
+        elif p[1] == '.$':
+            if p[2] is None:
+                p[0] = xonsh_subprocess_mode()
+            else:
+                p[0] = self._dollar_rules(["![", p[2]])
+        elif p[1] == '.?':
+            p[0] = xonsh_guess_mode()
+        else:
+            self._set_error(
+                f"unrecognized parse mode command {p1!r}",
+                self.currloc(lineno=p.lineno, column=p.lexpos),
+            )
 
     def p_expr_stmt_testlist_assign(self, p):
         """

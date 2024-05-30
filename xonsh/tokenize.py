@@ -158,6 +158,8 @@ CASE = N_TOKENS
 tok_name[N_TOKENS] = "CASE"
 N_TOKENS += 1
 _xonsh_tokens = {
+    ".$": "PERIOD_DOLLAR",
+    ".?": "PERIOD_QUESTION",
     "?": "QUESTION",
     "@=": "ATEQUAL",
     "@$": "ATDOLLAR",

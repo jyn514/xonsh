@@ -94,6 +94,8 @@ def token_map():
         "|=": "PIPEEQUAL",
         "//=": "DOUBLEDIVEQUAL",
         # extra xonsh operators
+        ".$": "PERIOD_DOLLAR",
+        ".?": "PERIOD_QUESTION",
         "?": "QUESTION",
         "??": "DOUBLE_QUESTION",
         "@$": "ATDOLLAR",

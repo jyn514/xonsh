@@ -46,6 +46,8 @@ class Execer:
             is set to true, it will cache command line input too, default: False.
         """
         parser_args = parser_args or {}
+        if "yacc_debug" not in parser_args:
+            parser_args["yacc_debug"] = debug_level > 0
         self.parser = Parser(**parser_args)
         self.filename = filename
         self._default_filename = filename
@@ -99,6 +101,7 @@ class Execer:
             ctx = set()
         elif isinstance(ctx, cabc.Mapping):
             ctx = set(ctx.keys())
+        import ast; print(ast.dump(tree))
         tree = self.ctxtransformer.ctxvisit(
             tree, input, ctx, mode=mode, debug_level=self.debug_level
         )

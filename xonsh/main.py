@@ -370,6 +370,7 @@ def start_services(shell_kwargs, args, pre_env=None):
 
 def premain(argv=None):
     """Setup for main xonsh entry point. Returns parsed arguments."""
+    print("hello")
     if argv is None:
         argv = sys.argv[1:]
     setup_timings(argv)
